@@ -35,3 +35,5 @@ serve_images/
 scripts_private/*
 inference_example.py
 .vscode/*
+scripts/llava-more/eval/log/*.err
+scripts/llava-more/eval/log/*.out

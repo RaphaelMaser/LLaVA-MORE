@@ -111,6 +111,7 @@ class Llava(lmms):
         self.entity_k = kwargs.pop("entity_k", 4)
         self.model_architecture = kwargs.pop("model_architecture", None)
         self.conv_template = kwargs.pop("conv_mode", None) # define the conversation template
+        self.vision_tower_override = kwargs.pop("vision_tower_override", None)
         
         assert kwargs == {}, f"Unexpected kwargs: {kwargs}"
 
@@ -148,6 +149,8 @@ class Llava(lmms):
         llava_model_args = {}
         llava_model_args["model_architecture"] = self.model_architecture
         llava_model_args["attn_implementation"] = attn_implementation
+        if self.vision_tower_override is not None:
+            llava_model_args["vision_tower_override"] = self.vision_tower_override
         if customized_config:
             llava_model_args["customized_config"] = customized_config
         if attn_implementation is not None:
@@ -159,7 +162,16 @@ class Llava(lmms):
         model_name= pretrained # our fix: to use checkpoint saved on disk
         try:
             # Try to load the model with the multimodal argument
-            self._tokenizer, self._model, self._image_processor, self._max_length = load_pretrained_model(pretrained, None, model_name, device_map=self.device, mlp_path=mlp_path, **llava_model_args)
+            # IMPORTANT: `device_map` must be a string/dict understood by Transformers/Accelerate.
+            # Passing a torch.device here can lead to unintended placement (e.g. CPU) and huge slowdowns.
+            self._tokenizer, self._model, self._image_processor, self._max_length = load_pretrained_model(
+                pretrained,
+                None,
+                model_name,
+                device_map=self.device_map,
+                mlp_path=mlp_path,
+                **llava_model_args,
+            )
         except TypeError:
             # for older versions of LLaVA that don't have multimodal and attn_implementation arguments
             llava_model_args.pop("multimodal", None)

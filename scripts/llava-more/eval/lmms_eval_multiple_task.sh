@@ -1,16 +1,16 @@
 #!/bin/bash
 
 export HF_HUB_OFFLINE=1
-export HF_HUB_CACHE=<path_to_hf_cache>
-export HF_DATASETS_CACHE=<path_to_datasets_cache>
+export HF_HUB_CACHE=os.getenv("CACHE_PATH")
+export HF_DATASETS_CACHE=os.getenv("DATA_PATH")
 
 export OPENAI_API_KEY="<your_openai_api_key>"
 export TRANSFORMERS_VERBOSITY=info
 
 export PYTHONPATH=.
-export WANDB_ENTITY=project_entity
-export WANDB_PROJECT=project_name
-export WANDB_MODE=offline
+export WANDB_ENTITY=raphaelmaser
+export WANDB_PROJECT=llava-more
+export WANDB_MODE=online
 
 source activate more
 cd local/path

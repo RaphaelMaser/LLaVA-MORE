@@ -22,10 +22,18 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAn
 import torch
 from src.llava.model import *
 from src.llava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from src.llava.model.multimodal_encoder.builder import build_vision_tower
+
+
+def _override_vision_tower(model, vision_tower_override: str):
+    model.config.mm_vision_tower = vision_tower_override
+    model.get_model().vision_tower = build_vision_tower(model.config, delay_load=True)
 
 
 def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", 
                           use_flash_attn=False, mlp_path=None, **kwargs):
+    model_architecture = kwargs.pop("model_architecture", None)
+    vision_tower_override = kwargs.pop("vision_tower_override", None)
     kwargs = {"device_map": device_map, **kwargs}
 
     if device != "cuda":
@@ -153,11 +161,6 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                 model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, trust_remote_code=True, **kwargs)
             else:
                 print(f"Load the model: {model_path}")
-                if 'model_architecture' in kwargs:
-                    model_architecture = kwargs.pop("model_architecture")
-                    if "gemma" in model_architecture: # set the correct attention implementation for gemma_2 model
-                        kwargs["attn_implementation"] = "eager"
-                
                 try:             
                     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
                 except:
@@ -165,6 +168,9 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                 model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **kwargs)
 
     image_processor = None
+
+    if vision_tower_override is not None:
+        _override_vision_tower(model, vision_tower_override)
 
     if 'llava' in model_name.lower() or mlp_path is not None or model_architecture is not None:
         mm_use_im_start_end = getattr(model.config, "mm_use_im_start_end", False)
@@ -198,9 +204,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         vision_tower = model.get_vision_tower()
 
         if not vision_tower.is_loaded:
-            vision_tower.load_model(device_map=device_map)
+            from src.llava.model.multimodal_encoder.aloe_encoder import AloeVisionTower
+            if isinstance(vision_tower, AloeVisionTower):
+                _load_dtype = kwargs.get('torch_dtype', None)
+                vision_tower.load_model(device_map=device_map, torch_dtype=_load_dtype)
+            else:
+                vision_tower.load_model(device_map=device_map)
         if device_map != 'auto':
-            vision_tower.to(device=device_map, dtype=torch.float16)
+            if isinstance(device_map, dict):
+                _dev = next(iter(device_map.values()))
+            else:
+                _dev = device_map
+            vision_tower.to(device=_dev)
         image_processor = vision_tower.image_processor
 
     if hasattr(model.config, "max_sequence_length"):

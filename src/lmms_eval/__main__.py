@@ -198,6 +198,12 @@ def parse_eval_args() -> argparse.Namespace:
         help="Define the LLaVA architecture of the model.",
         choices= ["gemma_2", "phi_4", "llama_3_1", "llama_3", "mpt", "None"],
     )
+    parser.add_argument(
+        "--vision_tower",
+        type=str,
+        default=None,
+        help="Optional override for model.config.mm_vision_tower, e.g. aloe://distilled/siglip2_base",
+    )
     args = parser.parse_args()
     return args
 
