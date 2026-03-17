@@ -7,7 +7,7 @@ import os
 import json
 import logging
 
-from lmms_eval.tasks._task_utils.file_utils import generate_submission_file
+from src.lmms_eval.tasks._task_utils.file_utils import generate_submission_file
 
 lmms_logger = logging.getLogger("lmms-eval")
 

@@ -102,6 +102,7 @@ def simple_evaluate(
             "entity_k" : cli_args.entity_k,
             "conv_mode" : cli_args.conv_mode,
             "model_architecture": cli_args.model_architecture,
+            "vision_tower_override": getattr(cli_args, "vision_tower", None),
         },
     )
 

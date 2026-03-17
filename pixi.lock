@@ -2144,7 +2144,7 @@ packages:
 - pypi: ../aloe-align_once_to_explain
   name: interpretability-thesis
   version: 0.1.0
-  sha256: 4f8d518899fcfe7ba5504e45fde581a578176d2fc7ddfc423e0d7a8ebc27f5b9
+  sha256: 10e3bd5ebc8fd5bf1e3fe2d7cb1ac77b315f7e33615b4d631183c9342961493e
   requires_dist:
   - numpy
   - pandas
@@ -2152,6 +2152,7 @@ packages:
   - scikit-learn
   - torch
   - torchvision
+  - beartype
   - tqdm
   - pyyaml
   editable: true

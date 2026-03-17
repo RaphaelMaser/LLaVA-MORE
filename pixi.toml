@@ -95,6 +95,7 @@ ujson = ">=5.9.0"
 wandb = ">=0.16.4"
 webdataset = ">=0.2.86"
 hydra-core = ">=1.3.2"
+#sglang = { version = "*", extras = ["all"] }
 
 # Local editable install to make aloe imports available
 interpretability-thesis = { path = "../aloe-align_once_to_explain", editable = true }

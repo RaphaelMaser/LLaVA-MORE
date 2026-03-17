@@ -53,7 +53,7 @@ export TOKENIZER_PATH="${TOKENIZER_PATH:-$MODEL_PATH}"
 
 mkdir -p "$OUTPUT_DIR"
 
-MODEL_ARGS="pretrained=$MODEL_PATH,dtype=float16"
+MODEL_ARGS="pretrained=$MODEL_PATH,dtype=float32"
 VISION_TOWER_ARGS=()
 if [[ "$USE_ALOE" == "1" || "$USE_ALOE" == "true" || "$USE_ALOE" == "yes" ]]; then
     VISION_TOWER_ARGS=(--vision_tower "$VISION_TOWER")
